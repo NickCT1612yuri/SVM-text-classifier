@@ -1,3 +1,3 @@
 window.APP_CONFIG = {
-  apiBaseUrl: "http://localhost:8000"
+  apiBaseUrl: "https://svm-text-classifier-api.onrender.com"
 };

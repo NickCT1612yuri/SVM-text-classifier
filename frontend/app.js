@@ -215,6 +215,13 @@ function showResults({ label, top_predictions }) {
 }
 
 function showError(msg) {
-  errorMessage.textContent = msg;
+  const isGithubPages = window.location.hostname.endsWith("github.io");
+  const isLocalApi = API_BASE.includes("localhost") || API_BASE.includes("127.0.0.1");
+
+  if (isGithubPages && isLocalApi) {
+    errorMessage.textContent = "Backend URL is still set to localhost. Update frontend/config.js to your Render URL (https://...onrender.com) and push again.";
+  } else {
+    errorMessage.textContent = msg;
+  }
   errorCard.classList.remove("hidden");
 }
