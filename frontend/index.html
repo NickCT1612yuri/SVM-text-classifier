@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Text Classifier — SVM 20 Newsgroups</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🧠</span>
+        <span class="logo-text">TextClassifier <span class="badge">SVM</span></span>
+      </div>
+      <button id="themeToggle" class="theme-btn" aria-label="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>20-Newsgroups Text Classifier</h1>
+    <p class="subtitle">Powered by <strong>Support Vector Machine</strong> + TF-IDF<br>
+      Trained on 20 000+ posts across 20 topic categories.</p>
+  </section>
+
+  <!-- Main -->
+  <main class="container">
+    <div class="card input-card">
+      <label class="card-label" for="textInput">Paste or type your text below</label>
+      <textarea
+        id="textInput"
+        placeholder="e.g. The Hubble Space Telescope has captured stunning new images of a distant galaxy cluster…"
+        rows="7"
+        spellcheck="true"
+      ></textarea>
+      <div class="input-actions">
+        <div class="sample-group">
+          <span class="sample-label">Try a sample:</span>
+          <div id="sampleButtons" class="sample-buttons"></div>
+        </div>
+        <button id="predictBtn" class="btn btn-primary" disabled>
+          <span class="btn-text">Classify</span>
+          <span class="btn-spinner hidden" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsCard" class="card results-card hidden">
+      <div class="result-header">
+        <div>
+          <p class="result-meta">Predicted category</p>
+          <h2 id="resultLabel" class="result-label">—</h2>
+        </div>
+        <div id="resultBadge" class="result-category-badge"></div>
+      </div>
+
+      <div class="confidence-section">
+        <h3 class="section-title">Top 5 Predictions</h3>
+        <div id="confidenceBars" class="confidence-bars"></div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div id="errorCard" class="card error-card hidden">
+      <span class="error-icon">⚠️</span>
+      <p id="errorMessage">Something went wrong.</p>
+    </div>
+  </main>
+
+  <!-- Categories modal trigger -->
+  <div class="container categories-section">
+    <button id="showCategoriesBtn" class="btn btn-outline">View all 20 categories</button>
+    <div id="categoriesGrid" class="categories-grid hidden"></div>
+  </div>
+
+  <footer class="footer">
+    <p>BML Final Project · SVM Text Classification · 20 Newsgroups Dataset</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
