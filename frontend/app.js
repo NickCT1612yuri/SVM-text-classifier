@@ -1,5 +1,5 @@
 // ── Config ────────────────────────────────────────────────────────────────
-const API_BASE = "http://localhost:8000";
+const API_BASE = window.APP_CONFIG?.apiBaseUrl || "http://localhost:8000";
 
 // ── Category metadata (emoji + display label) ─────────────────────────────
 const CATEGORY_META = {

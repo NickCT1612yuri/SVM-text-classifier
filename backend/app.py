@@ -6,14 +6,16 @@ Start with:
 
 import os
 import joblib
+import numpy as np
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 MODEL_DIR = "model"
 MODEL_PATH      = os.path.join(MODEL_DIR, "svm_model.joblib")
 VECTORIZER_PATH = os.path.join(MODEL_DIR, "tfidf_vectorizer.joblib")
 LABELS_PATH     = os.path.join(MODEL_DIR, "target_names.joblib")
+METRICS_PATH    = os.path.join(MODEL_DIR, "metrics.joblib")
 
 # ── Boot-time check ──────────────────────────────────────────────────────────
 for path in (MODEL_PATH, VECTORIZER_PATH, LABELS_PATH):
@@ -26,6 +28,7 @@ for path in (MODEL_PATH, VECTORIZER_PATH, LABELS_PATH):
 model        = joblib.load(MODEL_PATH)
 vectorizer   = joblib.load(VECTORIZER_PATH)
 target_names = list(joblib.load(LABELS_PATH))
+metrics = joblib.load(METRICS_PATH) if os.path.exists(METRICS_PATH) else None
 
 # ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -45,7 +48,8 @@ app.add_middleware(
 class PredictRequest(BaseModel):
     text: str
 
-    @validator("text")
+    @field_validator("text")
+    @classmethod
     def text_must_not_be_empty(cls, v):
         if not v.strip():
             raise ValueError("text must not be empty")
@@ -64,10 +68,19 @@ class PredictResponse(BaseModel):
     top_predictions: list[TopPrediction]
 
 
+def normalize_scores(scores: np.ndarray) -> np.ndarray:
+    shifted = scores - np.max(scores)
+    exp_scores = np.exp(shifted)
+    return exp_scores / exp_scores.sum()
+
+
 # ── Routes ────────────────────────────────────────────────────────────────────
 @app.get("/health")
 def health():
-    return {"status": "ok", "num_classes": len(target_names)}
+    payload = {"status": "ok", "num_classes": len(target_names)}
+    if metrics is not None:
+        payload["metrics"] = metrics
+    return payload
 
 
 @app.get("/categories")
@@ -79,18 +92,18 @@ def get_categories():
 def predict(req: PredictRequest):
     try:
         X = vectorizer.transform([req.text])
-        pred_index = int(model.predict(X)[0])
+        decision_scores = model.decision_function(X)[0]
+        normalized_scores = normalize_scores(decision_scores)
+        pred_index = int(np.argmax(decision_scores))
         pred_label = target_names[pred_index]
 
-        # Probability scores from CalibratedClassifierCV
-        proba = model.predict_proba(X)[0]
         top_n = 5
-        top_indices = proba.argsort()[-top_n:][::-1]
+        top_indices = np.argsort(normalized_scores)[-top_n:][::-1]
         top_predictions = [
             TopPrediction(
                 label=target_names[i],
                 label_index=int(i),
-                confidence=round(float(proba[i]), 4),
+                confidence=round(float(normalized_scores[i]), 4),
             )
             for i in top_indices
         ]

@@ -7,7 +7,7 @@
 
 ## Project Structure
 
-```
+```text
 .
 ├── backend/
 │   ├── app.py           # FastAPI REST API
@@ -42,8 +42,8 @@ python train.py
 uvicorn app:app --reload --port 8000
 ```
 
-The API will be available at **http://localhost:8000**  
-Auto-generated docs: **http://localhost:8000/docs**
+The API will be available at `http://localhost:8000`  
+Auto-generated docs: `http://localhost:8000/docs`
 
 ### 2 — Frontend
 
@@ -58,14 +58,77 @@ python3 -m http.server 5500 --directory frontend
 # then visit http://localhost:5500
 ```
 
+The frontend reads its API URL from `frontend/config.js`:
+
+```js
+window.APP_CONFIG = {
+  apiBaseUrl: "http://localhost:8000"
+};
+```
+
+For local use, leave it as `http://localhost:8000`.
+For GitHub Pages, change it to your deployed backend URL, for example:
+
+```js
+window.APP_CONFIG = {
+  apiBaseUrl: "https://your-backend-service.onrender.com"
+};
+```
+
+GitHub Pages can host the frontend only. The FastAPI backend must be deployed separately to a service such as Render, Railway, or Azure.
+
+### 3 — Deploy backend to Render
+
+This repository now includes `render.yaml` so the API can be deployed as a Render Blueprint.
+
+Render will:
+
+1. Install `backend/requirements.txt`
+2. Run `python train.py` during build
+3. Start FastAPI with Uvicorn
+
+Steps:
+
+1. Push this repository to GitHub.
+2. Sign in to Render.
+3. Create a new `Blueprint` service from this repository.
+4. Render will detect `render.yaml` automatically.
+5. After deployment finishes, copy the backend URL.
+6. Update `frontend/config.js` with that backend URL.
+7. Push again so GitHub Pages uses the live API.
+
+### 4 — Deploy frontend to GitHub Pages
+
+This repository includes a GitHub Actions workflow that publishes the `frontend/` folder to GitHub Pages.
+
+Before enabling it:
+
+```bash
+# Edit the frontend config to point to your deployed backend
+open frontend/config.js
+```
+
+Then on GitHub:
+
+1. Go to your repository settings.
+2. Open `Settings > Pages`.
+3. Set `Source` to `GitHub Actions`.
+4. Push to `main` again if needed.
+
+Your frontend will be published at:
+
+```text
+https://NickCT1612yuri.github.io/SVM-text-classifier/
+```
+
 ---
 
 ## API Endpoints
 
 | Method | Path | Description |
-|--------|------|-------------|
-| `GET`  | `/health` | Health check |
-| `GET`  | `/categories` | List all 20 category names |
+| ------ | ---- | ----------- |
+| `GET` | `/health` | Health check |
+| `GET` | `/categories` | List all 20 category names |
 | `POST` | `/predict` | Classify text → top-5 predictions |
 
 ### Example request
@@ -97,13 +160,13 @@ curl -X POST http://localhost:8000/predict \
 ## Model Details
 
 | Component | Choice |
-|-----------|--------|
+| --------- | ------ |
 | Vectorizer | TF-IDF (unigrams + bigrams, 80k features, sublinear TF) |
 | Classifier | `LinearSVC` wrapped in `CalibratedClassifierCV` (3-fold) |
-| Preprocessing | Strip e-mails, URLs, numbers; sklearn `stop_words="english"` |
-| Training split | `subset="train"` — headers/footers/quotes removed |
+| Preprocessing | Preserve 20 Newsgroups metadata; sklearn `stop_words="english"` |
+| Training split | `subset="train"` with original posts retained |
 
-> Typical test-set accuracy: **~85–87 %** (macro F1 ≈ 0.85)
+> Current test-set accuracy for this pipeline: **0.8659** (macro F1 **0.8604**)
 
 ---
 
