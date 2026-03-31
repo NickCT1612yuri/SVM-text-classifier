@@ -183,13 +183,15 @@ function showResults({ label, top_predictions }) {
   resultLabel.textContent = label;
   resultBadge.textContent = meta.emoji;
 
-  // Confidence bars
+  // Score bars (supports both new `score` and legacy `confidence` fields)
   confidenceBars.innerHTML = "";
-  const maxScore = top_predictions[0]?.score || 1;
+  const scores = top_predictions.map((p) => Number(p.score ?? p.confidence ?? 0));
+  const maxScore = Math.max(...scores, 0.0001);
 
   top_predictions.forEach((p, idx) => {
-    const pct = ((p.score / maxScore) * 100).toFixed(1);
-    const scorePct = (p.score * 100).toFixed(1);
+    const rawScore = Number(p.score ?? p.confidence ?? 0);
+    const pct = ((rawScore / maxScore) * 100).toFixed(1);
+    const scorePct = (rawScore * 100).toFixed(1);
     const row = document.createElement("div");
     row.className = "bar-row";
     row.innerHTML = `
