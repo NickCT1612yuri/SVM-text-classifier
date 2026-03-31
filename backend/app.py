@@ -59,7 +59,7 @@ class PredictRequest(BaseModel):
 class TopPrediction(BaseModel):
     label: str
     label_index: int
-    confidence: float
+    score: float
 
 
 class PredictResponse(BaseModel):
@@ -103,7 +103,7 @@ def predict(req: PredictRequest):
             TopPrediction(
                 label=target_names[i],
                 label_index=int(i),
-                confidence=round(float(normalized_scores[i]), 4),
+                score=round(float(normalized_scores[i]), 4),
             )
             for i in top_indices
         ]

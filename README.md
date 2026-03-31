@@ -146,11 +146,11 @@ curl -X POST http://localhost:8000/predict \
   "label": "sci.space",
   "label_index": 14,
   "top_predictions": [
-    { "label": "sci.space",        "label_index": 14, "confidence": 0.8231 },
-    { "label": "sci.med",          "label_index": 13, "confidence": 0.0412 },
-    { "label": "sci.electronics",  "label_index": 12, "confidence": 0.0318 },
-    { "label": "sci.crypt",        "label_index": 11, "confidence": 0.0204 },
-    { "label": "comp.graphics",    "label_index": 1,  "confidence": 0.0171 }
+    { "label": "sci.space",              "label_index": 14, "score": 0.0880 },
+    { "label": "comp.sys.mac.hardware",  "label_index": 4,  "score": 0.0600 },
+    { "label": "sci.med",                "label_index": 13, "score": 0.0590 },
+    { "label": "rec.motorcycles",        "label_index": 8,  "score": 0.0540 },
+    { "label": "rec.sport.hockey",       "label_index": 10, "score": 0.0520 }
   ]
 }
 ```
@@ -162,9 +162,11 @@ curl -X POST http://localhost:8000/predict \
 | Component | Choice |
 | --------- | ------ |
 | Vectorizer | TF-IDF (unigrams + bigrams, 80k features, sublinear TF) |
-| Classifier | `LinearSVC` wrapped in `CalibratedClassifierCV` (3-fold) |
+| Classifier | `LinearSVC` |
 | Preprocessing | Preserve 20 Newsgroups metadata; sklearn `stop_words="english"` |
 | Training split | `subset="train"` with original posts retained |
+
+`score` values are softmax-normalized decision scores from the SVM, not calibrated probabilities.
 
 > Current test-set accuracy for this pipeline: **0.8659** (macro F1 **0.8604**)
 

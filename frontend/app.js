@@ -185,11 +185,11 @@ function showResults({ label, top_predictions }) {
 
   // Confidence bars
   confidenceBars.innerHTML = "";
-  const maxConf = top_predictions[0]?.confidence || 1;
+  const maxScore = top_predictions[0]?.score || 1;
 
   top_predictions.forEach((p, idx) => {
-    const pct = ((p.confidence / maxConf) * 100).toFixed(1);
-    const confPct = (p.confidence * 100).toFixed(1);
+    const pct = ((p.score / maxScore) * 100).toFixed(1);
+    const scorePct = (p.score * 100).toFixed(1);
     const row = document.createElement("div");
     row.className = "bar-row";
     row.innerHTML = `
@@ -197,7 +197,7 @@ function showResults({ label, top_predictions }) {
       <div class="bar-track">
         <div class="bar-fill ${idx === 0 ? "top" : ""}" style="width:0%" data-target="${pct}%"></div>
       </div>
-      <span class="bar-pct">${confPct}%</span>
+      <span class="bar-pct">${scorePct}%</span>
     `;
     confidenceBars.appendChild(row);
   });
